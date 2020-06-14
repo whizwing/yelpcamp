@@ -4,7 +4,7 @@ var express = require("express"),
  mongoose = require("mongoose");
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
-mongoose.connect("mongodb://localhost/yelp_camp")
+mongoose.connect("mongodb://localhost/yelpcamp")
 app.use(bodyParser.urlencoded({extended:true})); 
 app.set("view engine","ejs");
 
