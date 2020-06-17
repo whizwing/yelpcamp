@@ -2,18 +2,20 @@ var express = require("express"),
  app = express(),
  bodyParser = require('body-parser'),
  mongoose = require("mongoose");
+ Campground = require("./models/campground");
+ seedDB = require("./seeds");Campground = require("./models/campground");
+
+
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
 mongoose.connect("mongodb://localhost/yelpcamp")
 app.use(bodyParser.urlencoded({extended:true})); 
 app.set("view engine","ejs");
+seedDB();
 
-var campgroundSchema = new mongoose.Schema({
-	name : String,
-	image : String,
-	description : String
-});
-var Campground = mongoose.model("Campground",campgroundSchema);
+
+
+
 
 // Campground.create(
 // {
@@ -75,17 +77,17 @@ app.get("/campgrounds/new",function(req,res){
 
 app.get("/campgrounds/:id",function(req,res){
 	
-	Campground.findById(req.params.id,function(err,foundcampground){
-		if(err){
+	Campground.findById(req.params.id).populate("comments").exec(function(err,foundcampground){
+		if(err){					// 오브젝트를 넘겨줄때 populate 한뒤 넘겨줌
 			console.log(err);
 		}else{
 			console.log(foundcampground);
 			res.render("show",{campground:foundcampground});
 			
 		}
-	})
+	});
 	 
-})
+});
 
 app.listen(3000,function(){
 	console.log("YelpCamp Server Started");
