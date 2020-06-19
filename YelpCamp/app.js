@@ -1,9 +1,14 @@
+var passport = require("passport");
+
 var express = require("express"),
  app = express(),
  bodyParser = require('body-parser'),
  mongoose = require("mongoose");
+ passport = require("passport");
+ LocalStrategy = require("passport-local");
  Campground = require("./models/campground");
  seedDB = require("./seeds");
+ User =require("./models/user");
  Comment = require("./models/comment");
 
 
@@ -15,9 +20,23 @@ app.set("view engine","ejs");
 app.use(express.static(__dirname+'/public'));
 
 // seedDB();
+//PASSPORT CONFIGURATION
+app.use(require("express-session")({
+	secret: "I like Welches ",
+	resave:false,
+	saveUninitialized:false
+}))
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
-
-
+//모든 템플릿으로 오브젝트 넘김 미들웨어 //모든 route에서 실행
+app.use(function(req,res,next){
+	res.locals.currentUser = req.user;
+	next();
+})
 
 
 // Campground.create(
@@ -54,12 +73,12 @@ app.get("/campgrounds",function(req,res){
 		if(err){
 			console.log(err);
 		}else{
-			res.render('campgrounds/index',{campgrounds:campgrounds});
+			res.render('campgrounds/index',{campgrounds:campgrounds,currentUser:req.user});
 		}
 	});
 });
 //create post
-app.post("/campgrounds",function(req,res){
+app.post("/campgrounds",isLoggedIn,function(req,res){
 	var name = req.body.name;
 	var image = req.body.image;
 	var description = req.body.description;
@@ -74,7 +93,7 @@ app.post("/campgrounds",function(req,res){
 	// campgrounds.push(newCampgronds);
 });
 
-app.get("/campgrounds/new",function(req,res){
+app.get("/campgrounds/new",isLoggedIn,function(req,res){
 	res.render("campgrounds/new");
 })
 //show page
@@ -91,7 +110,7 @@ app.get("/campgrounds/:id",function(req,res){
 	});
 });
 //comment page
-app.get("/campgrounds/:id/comments/new",function(req,res){
+app.get("/campgrounds/:id/comments/new",isLoggedIn,function(req,res){
 	Campground.findById(req.params.id,function(err,campground){
 		if(err){console.log(err);}
 		else{
@@ -102,7 +121,7 @@ app.get("/campgrounds/:id/comments/new",function(req,res){
 })
 
 //post comment
-app.post("/campgrounds/:id/comments",function(req,res){
+app.post("/campgrounds/:id/comments",isLoggedIn,function(req,res){
 	Comment.create(req.body.comment,function(err,comment){
 		if(err){
 			console.log(err);
@@ -120,9 +139,56 @@ app.post("/campgrounds/:id/comments",function(req,res){
 		}
 	})
 })
+// ================
+//AUTH ROUTES
+// =================
 
+//register route
+app.get("/register",function(req,res){
+	res.render("register");
+});
+app.post("/register",function(req,res){
+	User.register(new User({username:req.body.username}),req.body.password,function(err,user){
+		if(err){
+			console.log(err);
+			return res.render('register');
+		}
+		passport.authenticate("local")(req,res,function(){
+			res.redirect("/campgrounds")
+		})
+	})
+})
+
+//login route
+
+app.get("/login",function(req,res){
+	res.render("login");
+})
+
+app.post("/login",passport.authenticate("local",{
+	successRedirect:"/campgrounds",
+	failureRedirect:"/login"}),function(req,res){
+
+})
+
+//logout route
+app.get("/logout",function(req,res){
+	req.logout();
+	res.redirect("/campgrounds")
+})
+
+//login 체크 미들웨어
+function isLoggedIn(req,res,next){
+	if(req.isAuthenticated()){
+		return next();
+	}
+	res.redirect("/login");
+}
 
 
 app.listen(3000,function(){
 	console.log("YelpCamp Server Started");
 });
+
+
+
