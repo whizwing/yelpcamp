@@ -9,8 +9,10 @@ var express = require("express"),
  Campground = require("./models/campground");
  seedDB = require("./seeds");
  User =require("./models/user");
+ methodOverride = require("method-override");
  Comment = require("./models/comment");
 
+ //refactoring 
  var commentRoutes = require("./routes/comments"),
 	 campgroundRoutes = require("./routes/campgrounds"),
 	 indexRoutes = require("./routes/index")
@@ -23,6 +25,7 @@ mongoose.connect("mongodb://localhost/yelpcamp")
 app.use(bodyParser.urlencoded({extended:true})); 
 app.set("view engine","ejs");
 app.use(express.static(__dirname+'/public')); //css파일 경로 설정
+app.use(methodOverride("_method"));
 
 
 // seedDB();
