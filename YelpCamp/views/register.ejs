@@ -1,11 +1,16 @@
-
 <%- include("./partials/header") %>
 
 <h1>REGISTER</h1>
-<form action="/register" method="post">
-    <input type="text" name="username" placeholder="username">
-    <input type="text" name="password" placeholder="password">
+<div class="ui main text container segment">
+  <form class="ui form" action="/register" method="POST">
+    <div class="field">
+      <input type="text" name="username" placeholder="username" />
+    </div>
+    <div class="field">
+      <input type="text" name="password" placeholder="password" />
+    </div>
     <button>Signup</button>
-</form>
+  </form>
+</div>
 
 <%- include("./partials/footer") %>

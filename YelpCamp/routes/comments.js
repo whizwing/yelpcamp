@@ -112,6 +112,7 @@ router.put("/:comments_id",middleware.checkCommentOwnership,function(req,res){
 		if(err){
 			console.log(err);
 		}else{
+			req.flash("success","successfully added comment");
 			 res.redirect("/campgrounds/"+req.params.id);
 		}
 	})
@@ -123,6 +124,7 @@ router.delete("/:comments_id",middleware.checkCommentOwnership,function(req,res)
 		if(err){
 			res.redirect("back");
 		}else{
+			req.flash("success","successfully deleted comment");
 			res.redirect("/campgrounds/"+req.params.id);
 		}
 	})
