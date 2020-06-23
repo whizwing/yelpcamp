@@ -35,7 +35,8 @@ router.get("/", function (req, res) {
     } else {
       res.render("campgrounds/index", {
         campgrounds: campgrounds,
-        currentUser: req.user,
+        //
+        page: "campgrounds",
       });
     }
   });
