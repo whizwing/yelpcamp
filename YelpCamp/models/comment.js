@@ -1,25 +1,25 @@
 var mongoose = require("mongoose");
 
 // colt's
-var commentSchema = new mongoose.Schema( {
-    text : String,
-    author : {
-        id:{
-            type: mongoose.Schema.Types.ObjectId,
-            ref:"User"
-        },
-        username: String
-    }
+var commentSchema = new mongoose.Schema({
+  text: String,
+  createdAt: { type: Date, default: Date.now },
+  author: {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    username: String,
+  },
 });
 
-//referencing author
-// var commentSchema = new mongoose.Schema( {
+//referencing author// var commentSchema = new mongoose.Schema( {
 //     text : String,
-//     author : {        
+//     author : {
 //             type: mongoose.Schema.Types.ObjectId,
 //             ref:"User"
 //         }
-        
+
 //     }
 // );
 
@@ -32,5 +32,4 @@ var commentSchema = new mongoose.Schema( {
 //     }
 // });
 
-
-module.exports = mongoose.model("Comment",commentSchema);
+module.exports = mongoose.model("Comment", commentSchema);

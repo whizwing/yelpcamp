@@ -87,18 +87,18 @@ router.post("/", middleware.isLoggedIn, function (req, res) {
 });
 
 // 2. new campground page
-// router.get("/new",isLoggedIn,function(req,res){
-// 	res.render("campgrounds/new");
-// })
+router.get("/new", middleware.isLoggedIn, function (req, res) {
+  res.render("campgrounds/new");
+});
 
 //2. prevent an unauthenticated user from creating a campground
-router.get("/new", middleware.isLoggedIn, function (req, res) {
-  if (req.user.username === "kim") {
-    res.render("campgrounds/new");
-  } else {
-    res.redirect("/campgrounds");
-  }
-});
+// router.get("/new", middleware.isLoggedIn, function (req, res) {
+//   if (req.user.username === "kim") {
+//     res.render("campgrounds/new");
+//   } else {
+//     res.redirect("/campgrounds");
+//   }
+// });
 //.show page
 router.get("/:id", function (req, res) {
   Campground.findById(req.params.id)

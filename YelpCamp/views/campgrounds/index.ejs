@@ -1,7 +1,9 @@
 <%- include("../partials/header") %>
 
 
-
+<%if(currentUser && currentUser.isAdmin === true){%>
+<h1>You are admin</h1>
+<%}%>
 <header class='jumbotron'>
 	<div class="container">
 		<h1>Campgrounds</h1>
@@ -14,23 +16,23 @@
 <div class="row text-center" style="display:flex;flex-wrap:wrap;">
 	<% campgrounds.forEach(function(el){ %>
 
-	<div class="col-md-3 col-sm-6">
+<div class="col-md-3 col-sm-6">
 
-		<div class="thumbnail">
-			<img src="<%= el.image %>" width="300px">
-			<div class="caption">
-				<h4>
-					<%= el.name %>
-				</h4>
-			</div>
-			<P>
-				<a class="btn btn-info" href="/campgrounds/<%=el._id%>">More Info</a>
-			</P>
+	<div class="thumbnail">
+		<img src="<%= el.image %>" width="300px">
+		<div class="caption">
+			<h4>
+				<%= el.name %>
+			</h4>
 		</div>
-
-
+		<P>
+			<a class="btn btn-info" href="/campgrounds/<%=el._id%>">More Info</a>
+		</P>
 	</div>
-	<% }); %>
+
+
+</div>
+<% }); %>
 </div>
 
 

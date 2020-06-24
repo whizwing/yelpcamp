@@ -10,7 +10,10 @@ middlewareObj.checkCampgroundOwnership = function (req, res, next) {
       if (err) {
         res.redirect("back");
       } else {
-        if (campground.author.id.equals(req.user._id)) {
+        if (
+          campground.author.id.equals(req.user._id) ||
+          (req.user && req.user.isAdmin)
+        ) {
           next();
         } else {
           req.flash("error", "You are not permitted to edit");
@@ -30,8 +33,10 @@ middlewareObj.checkCommentOwnership = function (req, res, next) {
       if (err) {
         res.redirect("back");
       } else {
-        if (comment.author.id.equals(req.user._id)) {
-          ``;
+        if (
+          comment.author.id.equals(req.user._id) ||
+          (req.user && req.user.isAdmin)
+        ) {
           next();
         } else {
           req.flash("success", "you don't have a permission");

@@ -27,6 +27,7 @@ app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public")); //css파일 경로 설정
 app.use(methodOverride("_method"));
 app.use(flash());
+app.locals.moment = require("moment");
 
 // seedDB();
 //PASSPORT CONFIGURATION

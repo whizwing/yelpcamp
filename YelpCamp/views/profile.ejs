@@ -1,0 +1,32 @@
+<%- include("./partials/header") %>
+
+<h1>profile page</h1>
+<div class="row">
+    <div class="col-md-4">
+        <h1><%=user.firstName%></h1>
+        <div class="thumbnail">
+            <img src="<%=user.avatar%>" alt="user profile image">
+            <div class="caption"><a href="mailto:<%=user.email%>"><%=user.email%></a></div>
+
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="row text-center" style="display:flex;flex-wrap:wrap;">
+            <div class="col-md-6 ">
+                <% campground.forEach(function(el){ %>
+                <div class="thumbnail">
+                    <img src="<%= el.image %>" width="300px">
+                    <div class="caption">
+                        <h4>
+                            <a href="/campgrounds/<%=el._id%>"> <%= el.name %></a>
+                        </h4>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<%- include("./partials/footer") %>
