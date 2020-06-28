@@ -11,6 +11,19 @@
 		<p>
 			<a href="/campgrounds/new" class="btn btn-info btn-lg">Add new Campgrounds</a>
 		</p>
+		<p>
+			<form action="/campgrounds" method="GET" class="form-inline">	
+				<div class="form-group">
+					<input type="text" name="search" placeholder="Campground search..." class="form-control">
+					<input type="submit" value="Search" class="btn btn-default">
+				</div>
+			</form>
+			<div>
+				<%if(nomatch){%>
+<h3><%=nomatch%></h3>
+<%}%>
+			</div>
+		</p>
 	</div>
 </header>
 <div class="row text-center" style="display:flex;flex-wrap:wrap;">

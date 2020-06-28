@@ -11,6 +11,9 @@ Campground = require("./models/campground");
 seedDB = require("./seeds");
 User = require("./models/user");
 methodOverride = require("method-override");
+async = require("async");
+nodemailer = require("nodemailer");
+crypto = require("crypto");
 Comment = require("./models/comment");
 
 //refactoring

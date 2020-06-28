@@ -29,6 +29,25 @@ const { route } = require("./comments");
 
 //index (/campgrounds) page
 router.get("/", function (req, res) {
+  if (req.query.search) {
+    //fuzzy search
+    const regex = new RegExp(escapeRegex(req.query.search), "gi");
+    Campground.find({ name: regex }, function (err, campgrounds) {
+      if (err) {
+        req.flash("error", "not found");
+        res.redirect("/campgrounds");
+      } else {
+        let nomatch = "";
+        if (campgrounds.length < 1) {
+          nomatch = "Not found. Search Again";
+        }
+        res.render("campgrounds/index", {
+          campgrounds: campgrounds,
+          nomatch: nomatch,
+        });
+      }
+    });
+  }
   Campground.find({}, function (err, campgrounds) {
     if (err) {
       console.log(err);
@@ -36,7 +55,7 @@ router.get("/", function (req, res) {
       res.render("campgrounds/index", {
         campgrounds: campgrounds,
         //
-        page: "campgrounds",
+        // page: "campgrounds",
       });
     }
   });
@@ -173,5 +192,7 @@ router.delete("/:id", middleware.checkCampgroundOwnership, function (req, res) {
 //         res.redirect("back");
 //     }
 // }
-
+function escapeRegex(string) {
+  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+}
 module.exports = router;
