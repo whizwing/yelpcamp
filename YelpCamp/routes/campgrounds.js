@@ -5,6 +5,7 @@ var Notification = require("../models/notification");
 var User = require("../models/user");
 var middleware = require("../middleware"); //폴더이름만 써도 index.js를 검색
 const { route } = require("./comments");
+const middlewareObj = require("../middleware");
 
 //index (/campgrounds) page
 router.get("/", function (req, res) {
@@ -159,7 +160,7 @@ router.get("/new", middleware.isLoggedIn, function (req, res) {
 //.show page
 router.get("/:id", function (req, res) {
   Campground.findById(req.params.id)
-    .populate("comments")
+    .populate("comments likes")
     .exec(function (err, foundcampground) {
       if (err) {
         // 오브젝트를 넘겨줄때 populate 한뒤 넘겨줌
@@ -201,6 +202,33 @@ router.put("/:id", middleware.checkCampgroundOwnership, function (req, res) {
 router.delete("/:id", middleware.checkCampgroundOwnership, function (req, res) {
   Campground.findByIdAndDelete(req.params.id, function (err) {
     res.redirect("/campgrounds");
+  });
+});
+
+//7. add likes to campground
+router.post("/:id/like", middleware.isLoggedIn, function (req, res) {
+  Campground.findById(req.params.id, function (err, campground) {
+    if (err) {
+      req.flash("error", err.message);
+      res.redirect("back");
+    } else {
+      var foundUserLike = campground.likes.some((like) =>
+        like.equals(req.user._id)
+      );
+      if (foundUserLike) {
+        campground.likes.pull(req.user._id);
+      } else {
+        campground.likes.push(req.user);
+      }
+      campground.save(function (err) {
+        if (err) {
+          req.flash("error", err.message);
+          res.redirect("/campgrounds");
+        } else {
+          res.redirect("/campgrounds/" + campground._id);
+        }
+      });
+    }
   });
 });
 

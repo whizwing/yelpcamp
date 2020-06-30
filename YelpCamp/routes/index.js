@@ -9,6 +9,7 @@ var Campground = require("../models/campground");
 const { route } = require("./comments");
 const { isLoggedIn } = require("../middleware");
 const Notification = require("../models/notification");
+const campground = require("../models/campground");
 
 router.get("/", function (req, res) {
   res.render("campgrounds/landing");
@@ -261,6 +262,10 @@ router.post("/reset/:token", function (req, res) {
 // populate해서 notifications/index 페이지로 넘겨준다
 // 각각의 notification 을 클릭하면 router.get('/notifications/:id')에서 해당하는 notification을 불러온뒤
 // redirect('campgrounds/id') 에서 보여준다
+//참고사항
+// 1. campground.js 페이지에서 1-3. create campground post + user id(my version) + notification(my code)
+// req.user를 바로쓰면 안되고 populate 먼저 해줘야된다/
+// 2. db가 생성될 당시에 모델에 없었던 키는 나중에 모델을 바꿔도 추가(push)가 안된다.
 
 //user profile route #2
 router.get("/users/:id", async function (req, res) {
@@ -294,7 +299,7 @@ router.get("/follow/:id", isLoggedIn, async function (req, res) {
 //view all notification
 router.get("/notifications", isLoggedIn, async function (req, res) {
   try {
-    const user = await User.findById(req.user._id)
+    const user = await User.findById(req.user._id) //nested populate
       .populate({
         path: "notifications",
         options: { sort: { _id: -1 } }, //newest first

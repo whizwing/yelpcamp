@@ -27,19 +27,24 @@
 	</div>
 </header>
 <div class="row text-center" style="display:flex;flex-wrap:wrap;">
-	<% campgrounds.forEach(function(el){ %>
+	<% campgrounds.forEach(function(campground){ %>
 
 <div class="col-md-3 col-sm-6">
 
 	<div class="thumbnail">
-		<img src="<%= el.image %>" width="300px">
+		<img src="<%= campground.image %>" width="300px">
 		<div class="caption">
 			<h4>
-				<%= el.name %>
+				<%= campground.name %>
 			</h4>
+			<div>
+				<span class="badge label-primary"><i class="fas fa-thumbs-up"></i> <%= campground.likes.length %></span>
+			</div>
+
+
 		</div>
 		<P>
-			<a class="btn btn-info" href="/campgrounds/<%=el._id%>">More Info</a>
+			<a class="btn btn-info" href="/campgrounds/<%=campground._id%>">More Info</a>
 		</P>
 	</div>
 
