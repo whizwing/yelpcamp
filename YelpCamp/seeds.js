@@ -1,10 +1,6 @@
 var mongoose = require("mongoose");
 var Campground = require("./models/campground");
 var Comment = require("./models/comment");
-const { populate } = require("./models/campground");
-const { delete } = require("./routes");
-const { resolveContent } = require("nodemailer/lib/shared");
-const campground = require("./models/campground");
 
 var seeds = [
   {
@@ -27,26 +23,26 @@ var seeds = [
   },
 ];
 
-//async await refactoring
-// async function seedDB() {
-//   await Campground.remove({});
-//   console.log("campground removed");
-//   await Comment.remove({});
-//   console.log("comment removed");
+// async await refactoring
+async function seedDB() {
+  await Campground.remove({});
+  console.log("campground removed");
+  await Comment.remove({});
+  console.log("comment removed");
 
-//   for (const seed of seeds) {
-//     let campground = await Campground.create(seed);
-//     console.log("campground created");
-//     let comment = await Comment.create({
-//       text: "This place is great, but I wish there was internet",
-//       author: "Homer",
-//     });
-//     console.log("comment created");
-//     campground.comments.push(comment);
-//     campgrond.save();
-//     console.log("comment is attached to campground");
-//   }
-// }
+  for (const seed of seeds) {
+    let campground = await Campground.create(seed);
+    console.log("campground created");
+    let comment = await Comment.create({
+      text: "This place is great, but I wish there was internet",
+      author: "Homer",
+    });
+    console.log("comment created");
+    campground.comments.push(comment);
+    campgrond.save();
+    console.log("comment is attached to campground");
+  }
+}
 
 // function seedDB(){
 //    //Remove all campgrounds

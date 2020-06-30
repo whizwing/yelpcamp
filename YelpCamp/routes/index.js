@@ -7,6 +7,8 @@ var nodemailer = require("nodemailer");
 var crypto = require("crypto");
 var Campground = require("../models/campground");
 const { route } = require("./comments");
+const { isLoggedIn } = require("../middleware");
+const Notification = require("../models/notification");
 
 router.get("/", function (req, res) {
   res.render("campgrounds/landing");
@@ -228,26 +230,94 @@ router.post("/reset/:token", function (req, res) {
   );
 });
 
-//user profile route
-router.get("/users/:id", function (req, res) {
-  User.findOne({ username: req.params.id }, function (err, user) {
-    if (err) {
-      req.flash("error", "no user found");
-      res.redirect("back");
-    } else {
-      Campground.find()
-        .where("author.id")
-        .equals(user._id)
-        .exec(function (err, campground) {
-          if (err) {
-            req.flash("no campground found");
-            res.redirect("back");
-          } else {
-            res.render("profile", { user: user, campground: campground });
-          }
-        });
-    }
-  });
+//user profile route #1
+// router.get("/users/:id", function (req, res) {
+//   User.findOne({ username: req.params.id }, function (err, user) {
+//     if (err) {
+//       req.flash("error", "no user found");
+//       res.redirect("back");
+//     } else {
+//       Campground.find()
+//         .where("author.id")
+//         .equals(user._id)
+//         .exec(function (err, campground) {
+//           if (err) {
+//             req.flash("no campground found");
+//             res.redirect("back");
+//           } else {
+//             res.render("profile", { user: user, campground: campground });
+//           }
+//         });
+//     }
+//   });
+// });
+//notification 기능 설명
+// 유저프로필에 팔로우 버튼을 만듬(profile.ejs) 클릭하면 (프로필 페이지 유저의 id를 넘김)
+// router.get('follow/:id')에서 현재로그인한 유저 오브젝트를 팔로잉하는 유저의 followers안에 집어넣어준다
+// router.post('/campgrounds')에서 새로운 캠프그라운드를 만들때 현재유저의 followers를 모두 불러와서(for loop)
+// 그안에 notification을 만들어 준다
+//네비(헤더파일)에 notification 오브젝트 넘겨주기위해 app.js에서 app.use를 설정해준다
+// 네비에 notification 을 달아주고 클릭하면 router.get('/notifications/)에서  먼저 현재유저를 불러온뒤 notifications를
+// populate해서 notifications/index 페이지로 넘겨준다
+// 각각의 notification 을 클릭하면 router.get('/notifications/:id')에서 해당하는 notification을 불러온뒤
+// redirect('campgrounds/id') 에서 보여준다
+
+//user profile route #2
+router.get("/users/:id", async function (req, res) {
+  try {
+    let user = await User.findById(req.params.id).populate("followers").exec();
+    let campground = await Campground.find()
+      .where("author.id")
+      .equals(user._id)
+      .exec();
+    res.render("profile", { user, campground }); // res.render('profile',{user : user }) 를 줄여씀
+  } catch (err) {
+    req.flash("error", err.message);
+    return res.redirect("back");
+  }
+});
+
+//follow user
+router.get("/follow/:id", isLoggedIn, async function (req, res) {
+  try {
+    let user = await User.findById(req.params.id);
+    user.followers.push(req.user._id);
+    user.save();
+    req.flash("success", "Successfully followed " + user.username + "!");
+    res.redirect("/campgrounds");
+  } catch (err) {
+    req.flash("error", err.message);
+    req.redirect("back");
+  }
+});
+
+//view all notification
+router.get("/notifications", isLoggedIn, async function (req, res) {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: "notifications",
+        options: { sort: { _id: -1 } }, //newest first
+      })
+      .exec();
+    res.render("notifications", { user });
+  } catch (err) {
+    req.flash("error", err.message);
+    res.redirect("back");
+  }
+});
+
+//handle notifications
+router.get("/notifications/:id", async function (req, res) {
+  try {
+    const notification = await Notification.findById(req.params.id);
+    notification.isRead = true;
+    notification.save();
+    res.redirect("/campgrounds/" + notification.campgroundId);
+  } catch (err) {
+    req.flash("error", err.message);
+    res.redirect("back");
+  }
 });
 
 //login 체크 미들웨어

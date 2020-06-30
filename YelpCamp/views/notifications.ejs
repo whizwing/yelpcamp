@@ -1,0 +1,8 @@
+<h1>Notifications</h1>
+<% for(const notification of user.notifications){ %>
+<%if(!notification.isRead){ %>
+
+<li><a href="/campgrounds/<%=notification._id%>"> <%=notification.username%> uploaded new Campgorund</a></li>
+
+<%}%>
+<%}%>

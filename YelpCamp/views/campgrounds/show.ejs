@@ -18,7 +18,7 @@
         <h4><a href=""><%=campground.name%></a></h4>
         <p><%=campground.description%></p>
         <h4><em>Submitted by <a
-              href="/users/<%=campground.author.username%>"><%=campground.author.username%></a>,<%=moment(campground.createdAt).fromNow()%></em>
+              href="/users/<%=campground.author.id%>"><%=campground.author.username%></a>,<%=moment(campground.createdAt).fromNow()%></em>
         </h4>
         <!-- currentUser가 없으면 에러발생 먼저 currentUser 유무 체크 -->
         <%if(currentUser && campground.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin){%>
@@ -28,6 +28,9 @@
         </form>
         <%}%>
         </div>
+
+
+          <!-- comment section -->
       </div>
       <div class="well">
         <%if(currentUser){%>
@@ -37,6 +40,7 @@
         <%} %>
 
         <hr />
+
         <% campground.comments.forEach(function (comment) { %>
         <div class="row">
           <div class="col-md-12">

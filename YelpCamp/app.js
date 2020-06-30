@@ -15,6 +15,7 @@ async = require("async");
 nodemailer = require("nodemailer");
 crypto = require("crypto");
 Comment = require("./models/comment");
+User = require("./models/user");
 
 //refactoring
 var commentRoutes = require("./routes/comments"),
@@ -49,8 +50,18 @@ passport.deserializeUser(User.deserializeUser());
 
 //모든 템플릿으로 req.user 넘김 미들웨어 //모든 route에서 미들웨어로 실행
 //!!!모든 라우트의 위쪽에 위치해야함!!!
-app.use(function (req, res, next) {
+app.use(async function (req, res, next) {
   res.locals.currentUser = req.user;
+  if (req.user) {
+    try {
+      const user = await User.findById(req.user._id)
+        .populate("notifications", null, { isRead: false })
+        .exec();
+      res.locals.notifications = user.notifications.reverse();
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
   res.locals.error = req.flash("error"); //flash 설정
   res.locals.success = req.flash("success");
   next();

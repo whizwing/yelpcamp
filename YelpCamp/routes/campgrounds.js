@@ -1,29 +1,8 @@
-// Campground.create(
-// {
-// 	name : "salmon creek",
-// 	image : "https://www.nps.gov/mora/planyourvisit/images/OhanaCampground2016_CMeleedy_01_web.jpeg?maxwidth=1200&maxheight=1200&autorotate=false",
-// 	description : "This is beautifall camp ground in valley most popular area."
-
-// },function(err,campground){
-// 	if(err){
-// 		console.log(err)
-// 	}else{
-// 		console.log(campground);
-// 	}
-// });
-
-//  campgrounds = [
-// 	{name : "dowson creek", image : "
-//
-// 	{name : "city creek", image : " https://farm9.staticflickr.com/8605/16573646931_22fc928bf9_o.jpg"},
-// 	{name : "dowson creek", image : "https://www.nps.gov/mora/planyourvisit/images/OhanaCampground2016_CMeleedy_01_web.jpeg?maxwidth=1200&maxheight=1200&autorotate=false"},
-// 	{name : "salmon creek", image : "https://lh3.googleusercontent.com/proxy/vZT5IfkAYX_MXKxJPBOrxXAaUqUxZOUIswd4Pr3M2P3GZoWw6APn6wqHfYOyKUN8b5wPjqYSWh1rb4CWVHPSY8OyVwMSdx8XdmEtHegqnARz0KiTQSC_dhal-LUY6k69HJGppWwwMdo1wdxC"},
-// 	{name : "city creek", image : " https://farm9.staticflickr.com/8605/16573646931_22fc928bf9_o.jpg"},
-// ];
-
 var express = require("express");
 var router = express.Router();
 var Campground = require("../models/campground");
+var Notification = require("../models/notification");
+var User = require("../models/user");
 var middleware = require("../middleware"); //폴더이름만 써도 index.js를 검색
 const { route } = require("./comments");
 
@@ -44,6 +23,7 @@ router.get("/", function (req, res) {
         res.render("campgrounds/index", {
           campgrounds: campgrounds,
           nomatch: nomatch,
+          page: "campgrounds",
         });
       }
     });
@@ -52,15 +32,17 @@ router.get("/", function (req, res) {
     if (err) {
       console.log(err);
     } else {
+      let nomatch = "";
       res.render("campgrounds/index", {
         campgrounds: campgrounds,
-        //
-        // page: "campgrounds",
+        nomatch: nomatch,
+        page: "campgrounds",
       });
     }
   });
 });
-//1. create campground post(colt's ver)
+
+//1-1. create campground post(colt's ver)
 // router.post("/",isLoggedIn,function(req,res){
 // 	var name = req.body.name;
 // 	var image = req.body.image;
@@ -81,28 +63,83 @@ router.get("/", function (req, res) {
 // 	// campgrounds.push(newCampgronds);
 // });
 
-// 1. create campground post + user id(my version)
-router.post("/", middleware.isLoggedIn, function (req, res) {
-  var name = req.body.name;
-  var price = req.body.price;
-  var image = req.body.image;
-  var description = req.body.description;
-  var newCampgronds = {
-    name: name,
-    price: price,
-    image: image,
-    description: description,
+// 1-2. create campground post + user id(my version)
+// router.post("/", middleware.isLoggedIn, function (req, res) {
+//   var name = req.body.name;
+//   var price = req.body.price;
+//   var image = req.body.image;
+//   var description = req.body.description;
+//   var newCampgronds = {
+//     name: name,
+//     price: price,
+//     image: image,
+//     description: description,
+//   };
+//   Campground.create(newCampgronds, function (err, campground) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       campground.author.id = req.user._id;
+//       campground.author.username = req.user.username;
+//       campground.save();
+//       res.redirect("/campgrounds");
+//     }
+//   });
+// });
+
+// 1-3. create campground post + user id(my version) + notification
+// router.post("/", middleware.isLoggedIn, function (req, res) {
+//   var name = req.body.name;
+//   var price = req.body.price;
+//   var image = req.body.image;
+//   var description = req.body.description;
+//   var newCampgronds = {
+//     name: name,
+//     price: price,
+//     image: image,
+//     description: description,
+//   };
+//   Campground.create(newCampgronds, function (err, campground) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       campground.author.id = req.user._id;
+//       campground.author.username = req.user.username;
+//       campground.save();
+//       res.redirect("/campgrounds");
+//     }
+//   });
+// });
+
+// 1-3. create campground post + user id(my version) + notification(my code)
+router.post("/", middleware.isLoggedIn, async function (req, res) {
+  var newCampgrounds = {
+    name: req.body.name,
+    price: req.body.price,
+    image: req.body.image,
+    description: req.body.description,
+    author: {
+      id: req.user._id,
+      username: req.user.username,
+    },
   };
-  Campground.create(newCampgronds, function (err, campground) {
-    if (err) {
-      console.log(err);
-    } else {
-      campground.author.id = req.user._id;
-      campground.author.username = req.user.username;
-      campground.save();
-      res.redirect("/campgrounds");
+  try {
+    const campground = await Campground.create(newCampgrounds);
+    const user = await User.findById(req.user._id).populate("followers").exec();
+    const notification = await Notification.create({
+      username: req.user.username,
+      campgroundId: campground.id,
+    });
+
+    for (const follower of user.followers) {
+      follower.notifications.push(notification);
+      follower.save();
     }
-  });
+    res.redirect("/campgrounds");
+  } catch (err) {
+    req.flash("error", err.message);
+    res.redirect("back");
+  }
 });
 
 // 2. new campground page
@@ -118,6 +155,7 @@ router.get("/new", middleware.isLoggedIn, function (req, res) {
 //     res.redirect("/campgrounds");
 //   }
 // });
+
 //.show page
 router.get("/:id", function (req, res) {
   Campground.findById(req.params.id)
